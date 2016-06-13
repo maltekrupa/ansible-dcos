@@ -13,6 +13,7 @@
     - unzip
     - curl
     - ipset
+    - docker-python
 
 - name: Set Selinux permissive
   selinux: policy=targeted state=permissive
