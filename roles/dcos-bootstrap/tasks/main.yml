@@ -24,7 +24,6 @@
 - name: Host DC/OS install package through nginx Docker container
   docker_container:
     name: nginx
-    state: present
     image: nginx
     ports:
       - "80:80"
