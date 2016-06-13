@@ -1,22 +1,32 @@
 ---
 - name: Create genconf directory
-  file: path=/genconf state=directory
+  file: path="{{ bootstrap_basedir }}/genconf" state=directory
 
 - name: Copy configuration file
-  template: src=config.yaml.j2 dest=/genconf/config.yaml
+  template: src=config.yaml.j2 dest="{{ bootstrap_basedir }}/genconf/config.yaml"
 
 - name: Copy ip-detect file
-  template: src=ip-detect.j2 dest=/genconf/ip-detect
+  template: src=ip-detect.j2 dest="{{ bootstrap_basedir }}/genconf/ip-detect"
 
 - name: Download the DC/OS installer
-  get_url: url=https://downloads.dcos.io/dcos/EarlyAccess/dcos_generate_config.sh dest=/dcos_generate_config.sh
+  get_url: url=https://downloads.dcos.io/dcos/EarlyAccess/dcos_generate_config.sh dest="{{ bootstrap_basedir }}/dcos_generate_config.sh"
+
+- name: Check if dcos serve directory is already present
+  stat: path="{{ bootstrap_basedir }}/genconf/serve"
+  register: serve_directory
 
 - name: Generate customized DC/OS build file
-  command: bash /dcos_generate_config.sh
+  command: bash "{{ bootstrap_basedir }}/dcos_generate_config.sh"
   args:
-    chdir: /
+    chdir: "{{ bootstrap_basedir }}"
+  when: serve_directory.stat.exists == False
 
-## cheat and run raw docker command. this needs to be converted using docker module
-## we should remove elevated privs
 - name: Host DC/OS install package through nginx Docker container
-  command: docker run -d -p 80:80 -v /genconf/serve:/usr/share/nginx/html:ro nginx
+  docker_container:
+    name: nginx
+    state: present
+    image: nginx
+    ports:
+      - "80:80"
+    volumes:
+      - "{{ bootstrap_basedir }}/genconf/serve:/usr/share/nginx/html:ro"
