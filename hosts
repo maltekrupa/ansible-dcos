@@ -1,4 +1,4 @@
-[cluster:children
+[cluster:children]
 master
 agent
 
