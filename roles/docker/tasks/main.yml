@@ -32,6 +32,32 @@
   tags:
     - docker
 
+- name: Load overlay kernel module
+  modprobe:
+    state: present
+    name: overlay
+  tags:
+    - docker
+
+- name: Load overlay kernel module at boot
+  lineinfile:
+    state: present
+    dest: /etc/modules
+    regexp: overlay
+    line: overlay
+  tags:
+    - docker
+
+- name: Create systemd file
+  template:
+    src: lib_systemd_system_docker.service
+    dest: /lib/systemd/system/docker.service
+    mode: 0644
+    owner: root
+    group: root
+  tags:
+    - docker
+
 - name: Start and enable dockerd
   service:
     name: docker
