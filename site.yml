@@ -2,7 +2,15 @@
 - hosts: all
   become: True
   become_user: root
+  gather_facts: False
   roles:
+    - bootstrap
+
+- hosts: all
+  become: True
+  become_user: root
+  roles:
+    - bootstrap
     - apt
     - ssh
     - firewall
