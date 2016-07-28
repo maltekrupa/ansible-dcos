@@ -1,4 +1,4 @@
-bootstrap_url: http://{{ groups['dcos-bootstrap'][0] }}:80
+bootstrap_url: http://{{ groups['bootstrap'][0] }}:80
 oauth_enabled: 'false'
 telemetry_enabled: 'false'
 
@@ -6,7 +6,7 @@ cluster_name: 'dcos-ansible'
 exhibitor_storage_backend: static
 ip_detect_filename: {{ bootstrap_basedir }}/genconf/ip-detect
 master_list:
-{% for host in groups['mesos-master'] %}
+{% for host in groups['master'] %}
 - {{ host }}
 {% endfor %}
 
