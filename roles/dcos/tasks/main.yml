@@ -6,6 +6,8 @@
   with_items:
     - unzip
     - ipset
+  tags:
+    - dcos
 
 - name: Create links for dcos since it expects stuff at the RedHat locations
   file:
@@ -17,11 +19,15 @@
     - ln
     - tar
     - rm
+  tags:
+    - dcos
 
 - name: Create /opt/dcos directory
   file:
     path: /opt/dcos
     state: directory
+  tags:
+    - dcos
 
 - name: Download the DC/OS installer from the nginx Docker container
   get_url:
@@ -29,21 +35,29 @@
     dest: /opt/dcos/dcos_install.sh
     force: yes
   register: new_install_script
+  tags:
+    - dcos
 
 - name: Check if mesosphere is already installed
   stat:
     path: /opt/mesosphere
   register: mesosphere_directory
+  tags:
+    - dcos
 
 - name: Uninstall DC/OS
   command: /opt/mesosphere/bin/pkgpanda uninstall
   when: new_install_script.changed == True and mesosphere_directory.stat.exists == True
+  tags:
+    - dcos
 
 - name: Remove DC/OS
   file:
     state: absent
     path: /opt/mesosphere
   when: new_install_script.changed == True and mesosphere_directory.stat.exists == True
+  tags:
+    - dcos
 
 - name: Check if mesos-dns already stopped working
   wait_for:
@@ -52,6 +66,8 @@
     delay: 10
     state: stopped
   when: new_install_script.changed == True and mesosphere_directory.stat.exists == True
+  tags:
+    - dcos
 
 - name: Allow zookeeper to communication
   ufw:
@@ -62,9 +78,13 @@
   with_nested:
     - "{{ groups['master'] }}"
     - "{{ dcos_zookeeper_ports }}"
+  tags:
+    - dcos
 
 - name: Install DC/OS
   command: "bash dcos_install.sh {{ type }}"
   args:
     chdir: /opt/dcos
   when: new_install_script.changed == True or mesosphere_directory.stat.exists == False
+  tags:
+    - dcos
