@@ -23,7 +23,7 @@
   when: new_install_script.changed == True and mesosphere_directory.stat.exists == True
 
 - name: Install DC/OS
-  command: bash dcos_install.sh master
+  command: "bash dcos_install.sh {{ type }}"
   args:
     chdir: /opt/dcos
   when: new_install_script.changed == True or mesosphere_directory.stat.exists == False
