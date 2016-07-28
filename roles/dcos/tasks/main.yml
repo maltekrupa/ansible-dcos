@@ -53,6 +53,16 @@
     state: stopped
   when: new_install_script.changed == True and mesosphere_directory.stat.exists == True
 
+- name: Allow zookeeper to communication
+  ufw:
+    proto: tcp
+    src: "{{ item[0] }}"
+    port: "{{ item[1] }}"
+    rule: allow
+  with_nested:
+    - "{{ groups['master'] }}"
+    - "{{ dcos_zookeeper_ports }}"
+
 - name: Install DC/OS
   command: "bash dcos_install.sh {{ type }}"
   args:

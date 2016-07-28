@@ -1,0 +1,5 @@
+---
+dcos_zookeeper_ports:
+  - 2181
+  - 2888
+  - 3888
