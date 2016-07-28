@@ -1,4 +1,23 @@
 ---
+- name: Install required packages
+  apt:
+    state: present
+    pkg: "{{ item }}"
+  with_items:
+    - unzip
+    - ipset
+
+- name: Create links for dcos since it expects stuff at the RedHat locations
+  file:
+    state: link
+    src: "/bin/{{ item }}"
+    path: "/usr/bin/{{ item }}"
+  with_items:
+    - mkdir
+    - ln
+    - tar
+    - rm
+
 - name: Create /opt/dcos directory
   file:
     path: /opt/dcos
