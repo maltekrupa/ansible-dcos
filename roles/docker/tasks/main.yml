@@ -28,7 +28,7 @@
 - name: Install docker-py
   pip:
     state: present
-    pkg: docker-py
+    name: docker-py
   tags:
     - docker
 
