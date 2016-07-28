@@ -17,6 +17,6 @@
     - timezone
     - shell
 
+- include: site_bootstrap.yml
 - include: site_master.yml
 - include: site_agent.yml
-- include: site_bootstrap.yml
