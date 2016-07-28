@@ -7,5 +7,4 @@
       hostname:
         name: "{{ hostname }}"
   roles:
-    - docker
     - dcos-bootstrap

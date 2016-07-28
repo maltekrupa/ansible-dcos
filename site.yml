@@ -16,6 +16,7 @@
     - firewall
     - timezone
     - shell
+    - docker
 
 - include: site_bootstrap.yml
 - include: site_master.yml
