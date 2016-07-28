@@ -1,0 +1,41 @@
+---
+- name: Install repository key
+  apt_key:
+    state: present
+    keyserver: "{{ docker_keyserver }}"
+    id: "{{ docker_key_id }}"
+  tags:
+    - docker
+
+- name: Install remote repository
+  apt_repository:
+    state: present
+    repo: "{{ docker_repo_url }}"
+  tags:
+    - docker
+
+- name: Install docker and pip
+  apt:
+    state: present
+    pkg: "{{ item }}"
+    cache_valid_time: 3600
+  with_items:
+    - docker-engine
+    - python-pip
+  tags:
+    - docker
+
+- name: Install docker-py
+  pip:
+    state: present
+    pkg: docker-py
+  tags:
+    - docker
+
+- name: Start and enable dockerd
+  service:
+    name: docker
+    state: started
+    enabled: True
+  tags:
+    - docker

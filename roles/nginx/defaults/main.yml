@@ -1,0 +1,21 @@
+---
+nginx_packages:
+  - "nginx"
+  - "python-passlib"
+nginx_removed_vhosts: []
+nginx_vhosts:
+  default: |
+    server {
+      listen 80 default_server;
+      root /usr/share/nginx/html;
+      index index.html index.htm;
+      server_name {{ ansible_fqdn }};
+
+      location / {
+        try_files $uri $uri/ =404;
+      }
+
+      location ~ /\.ht {
+        deny all;
+      }
+    }

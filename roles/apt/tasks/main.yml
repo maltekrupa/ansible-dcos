@@ -1,0 +1,54 @@
+---
+- name: Deploy sources.list
+  template:
+    src: etc_apt_sources.list.j2
+    dest: /etc/apt/sources.list
+    mode: 0644
+  tags:
+    - apt
+
+- name: Find obsolete kernel
+  shell: 'dpkg -l | egrep "linux-image-[0-9]" | awk "{print \$3,\$2}" | sort -nr | tail -n +2 | grep -v $(uname -r) | awk "{print \$2}"'
+  register:
+    old_kernel
+  changed_when:
+    old_kernel.stdout != ''
+  tags:
+    - apt
+
+- name: Purge old kernels
+  apt:
+    state: absent
+    purge: True
+    name: "{{ old_kernel.stdout }}"
+  register:
+    kernelpurge_output
+  when:
+    old_kernel.stdout is defined and old_kernel.stdout != ''
+  tags:
+    - apt
+
+# https://github.com/ansible/ansible-modules-core/issues/3200
+# - name: Autoremove unused packages
+#   apt:
+#     autoremove: True
+#   register: autoremove_output
+#   tags:
+#     - apt
+
+- name: Clean apt cache
+  command: apt-get clean
+  register:
+    apt_get_clean
+  changed_when:
+    "apt_get_clean.rc != 0"
+  tags:
+    - apt
+
+- name: Enable periodic unattended upgrade
+  template:
+    src: etc_apt_apt.conf.d_20auto-upgrades
+    dest: /etc/apt/apt.conf.d/20auto-upgrades
+    mode: 0644
+  tags:
+    - apt

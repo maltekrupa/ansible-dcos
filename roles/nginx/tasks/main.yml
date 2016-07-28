@@ -1,0 +1,80 @@
+---
+- name: Install nginx
+  apt:
+    state: present
+    pkg: "{{ item }}"
+    update_cache: True
+    cache_valid_time: 3600
+  with_items:
+    "{{ nginx_packages }}"
+  tags:
+    - nginx
+
+- name: Configure service
+  service:
+    state: started
+    enabled: True
+    name: nginx
+  tags:
+    - nginx
+
+- name: Configure nginx.conf
+  template:
+    src: nginx.conf.j2
+    dest: "/etc/nginx/nginx.conf"
+  notify:
+    - restart nginx
+  tags:
+    - nginx
+
+- name: Remove default site
+  file:
+    path: /etc/nginx/sites-enabled/default
+    state: absent
+  tags:
+    - nginx
+
+- name: Create vhosts
+  template:
+    src: vhost.j2
+    dest: "/etc/nginx/sites-available/{{ item }}.conf"
+  with_items:
+    "{{ nginx_vhosts.keys() | difference(nginx_remove_vhosts) }}"
+  notify:
+    - restart nginx
+  tags:
+    - nginx
+
+- name: Create links for sites-available
+  file:
+    state: link
+    src: "/etc/nginx/sites-available/{{ item }}.conf"
+    dest: "/etc/nginx/sites-enabled/{{ item }}.conf"
+  with_items:
+    "{{ nginx_vhosts.keys() | difference(nginx_remove_vhosts) }}"
+  notify:
+    - restart nginx
+  tags:
+    - nginx
+
+- name: Remove links for disabled sites
+  file:
+    state: absent
+    path: "/etc/nginx/sites-enabled/{{ item }}.conf"
+  with_items:
+    "{{ nginx_remove_vhosts | difference(nginx_vhosts) }}"
+  notify:
+    - restart nginx
+  tags:
+    - nginx
+
+- name: Allow port 80 and 443
+  ufw:
+    proto: tcp
+    port: "{{ item }}"
+    rule: allow
+  with_items:
+    - 80
+    - 443
+  tags:
+    - nginx

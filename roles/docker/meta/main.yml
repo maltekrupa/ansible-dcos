@@ -1,0 +1,8 @@
+galaxy_info:
+  author: Malte Krupa
+  description: Install and enable docker
+  license: GPLv2
+  platforms:
+  - name: Ubuntu
+    versions:
+    - trusty

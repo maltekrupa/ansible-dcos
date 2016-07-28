@@ -1,0 +1,9 @@
+galaxy_info:
+  author: Malte Krupa
+  description: Configure apt and purge old packages/kernels
+  license: GPLv2
+  min_ansible_version: 2.0
+  platforms:
+  - name: Ubuntu
+    versions:
+    - trusty

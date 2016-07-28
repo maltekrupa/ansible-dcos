@@ -1,0 +1,11 @@
+---
+- hosts: bootstrap
+  become: True
+  become_user: root
+  pre_tasks:
+    - name: Set hostname
+      hostname:
+        name: "{{ hostname }}"
+  roles:
+    - docker
+    - dcos-bootstrap

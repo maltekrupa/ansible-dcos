@@ -1,0 +1,23 @@
+---
+- name: Install ufw
+  apt:
+    state: present
+    name: ufw
+  tags:
+    - firewall
+
+- name: Allow ssh
+  ufw:
+    proto: tcp
+    port: 22
+    rule: allow
+  tags:
+    - firewall
+
+- name: Drop everything else
+  ufw:
+    state: enabled
+    direction: incoming
+    policy: deny
+  tags:
+    - firewall

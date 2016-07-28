@@ -1,0 +1,14 @@
+---
+- hosts: all
+  become: True
+  become_user: root
+  roles:
+    - apt
+    - ssh
+    - firewall
+    - timezone
+    - shell
+
+- include: site_master.yml
+- include: site_agent.yml
+- include: site_bootstrap.yml

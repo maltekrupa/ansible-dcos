@@ -1,0 +1,88 @@
+{% set upstream = item.split('.') %}
+upstream {{ upstream[0] }} {
+  server {{ nginx_vhosts[item].upstream_listen_address }}:{{ nginx_vhosts[item].upstream_listen_port }};
+}
+
+server {
+  listen [::]:80;
+  listen 80;
+  server_name {{ item }};
+
+  # Redirect ancient IE browsers to an "update your browser" site
+  if ($http_user_agent ~* '(MSIE 8.0|MSIE 7.0|MSIE 6.0)') {
+    return 301 http://browser-update.org/update.html;
+  }
+
+  # Redirect everything else to https
+  return 301 https://{{ item }}$request_uri;
+}
+
+server {
+  listen [::]:443 ssl;
+  listen 443 ssl;
+  server_name {{ item }};
+
+  # SSL settings
+  # Secure SSL settings (Not compatible with old browsers)
+  ssl_prefer_server_ciphers on;
+  ssl_protocols TLSv1 TLSv1.1 TLSv1.2;
+  ssl_ciphers 'EDH+CAMELLIA:EDH+aRSA:EECDH+aRSA+AESGCM:EECDH+aRSA+SHA384:EECDH+aRSA+SHA256:EECDH:+CAMELLIA256:+AES256:+CAMELLIA128:+AES128:+SSLv3:!aNULL:!eNULL:!LOW:!3DES:!MD5:!EXP:!PSK:!DSS:!RC4:!SEED:!ECDSA:CAMELLIA256-SHA:AES256-SHA:CAMELLIA128-SHA:AES128-SHA';
+  # These settings might be even more secure
+  # ssl_ciphers 'AES256+EECDH:AES256+EDH:!aNULL';
+
+  ssl_stapling on;
+  ssl_stapling_verify on;
+  ssl_session_cache 'shared:SSL:10m';
+
+  add_header Strict-Transport-Security 'max-age=31536000';
+  add_header X-Frame-Options 'DENY';
+  add_header X-content-Type-Options 'nosniff';
+
+  # SSL certificate
+  {% if nginx_vhosts[item].certificate_name is defined %}
+  ssl_dhparam /etc/nginx/certs/{{ nginx_vhosts[item].certificate_name }}.dhparam;
+  ssl_certificate /etc/nginx/certs/{{ nginx_vhosts[item].certificate_name }}.crt;
+  ssl_certificate_key /etc/nginx/certs/{{ nginx_vhosts[item].certificate_name }}.key;
+  {% else %}
+  ssl_dhparam /etc/nginx/certs/{{ item }}.dhparam;
+  ssl_certificate /etc/nginx/certs/{{ item }}.crt;
+  ssl_certificate_key /etc/nginx/certs/{{ item }}.key;
+  {% endif %}
+
+  # TODO
+  # Enable certificate pinning
+  # add_header Public-Key-Pins 'pin-sha256="yhuNqxW/cJqRFbycY2tssN8MteDulE2Zv07SKQP3DUI="; max-age=604800';
+
+  root /var/www/{{ item }};
+
+  location / {
+    {% if nginx_vhosts[item].basic_auth_realm is defined %}
+    auth_basic "{{ nginx_vhosts[item].basic_auth_realm }}";
+    auth_basic_user_file {{ nginx_vhosts[item].basic_auth_password_file }};
+    {% endif %}
+
+    try_files $uri @{{ upstream[0] }};
+  }
+
+  location @{{ upstream[0] }} {
+    proxy_pass_header Date;
+    proxy_set_header X-Real-IP $remote_addr;
+    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    proxy_set_header Host $http_host;
+    proxy_redirect off;
+
+    {% if nginx_vhosts[item].custom_proxy_directives is defined %}
+    {{ nginx_vhosts[item].custom_proxy_directives }}
+    {% endif %}
+
+    proxy_pass http://{{ upstream[0] }};
+  }
+
+  {% if nginx_vhosts[item].custom is defined %}
+  {{ nginx_vhosts[item].custom }}
+  {% endif %}
+
+  location ~ /\.ht {
+    deny all;
+  }
+}

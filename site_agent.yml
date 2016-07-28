@@ -1,0 +1,10 @@
+---
+- hosts: agent
+  become: True
+  become_user: root
+  pre_tasks:
+    - name: Set hostname
+      hostname:
+        name: "{{ hostname }}"
+  roles:
+    - { role: dcos, type: agent }

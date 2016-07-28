@@ -1,0 +1,18 @@
+---
+- name: Get a list of all user directories
+  find:
+    paths: /home
+    file_type: directory
+  register: home_directories
+  tags:
+    - shell
+
+- name: Change PS1 to contain fqdn
+  replace:
+    dest: "{{ item.path }}/.bashrc"
+    regexp: '\\h'
+    replace: '\\H'
+  with_items:
+    "{{ home_directories.files }}"
+  tags:
+    - shell
