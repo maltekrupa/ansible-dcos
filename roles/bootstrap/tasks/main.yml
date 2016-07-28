@@ -1,6 +1,5 @@
 ---
 - name: Install python
-  raw: apt-get update && apt-get install -y python
   raw: if ! which python >>/dev/null; then apt-get update && apt-get install -y python; fi
   tags:
     - bootstrap
