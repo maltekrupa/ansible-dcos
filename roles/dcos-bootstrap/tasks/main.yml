@@ -1,18 +1,27 @@
 ---
 - name: Create genconf directory
-  file: path="{{ bootstrap_basedir }}/genconf" state=directory
+  file:
+    state: directory
+    path: "{{ bootstrap_basedir }}/genconf"
 
 - name: Copy configuration file
-  template: src=config.yaml.j2 dest="{{ bootstrap_basedir }}/genconf/config.yaml"
+  template:
+    src: config.yaml.j2
+    dest: "{{ bootstrap_basedir }}/genconf/config.yaml"
 
 - name: Copy ip-detect file
-  template: src=ip-detect.j2 dest="{{ bootstrap_basedir }}/genconf/ip-detect"
+  template:
+    src: ip-detect.j2
+    dest: "{{ bootstrap_basedir }}/genconf/ip-detect"
 
 - name: Download the DC/OS installer
-  get_url: url=https://downloads.dcos.io/dcos/EarlyAccess/dcos_generate_config.sh dest="{{ bootstrap_basedir }}/dcos_generate_config.sh"
+  get_url:
+    url: https://downloads.dcos.io/dcos/EarlyAccess/dcos_generate_config.sh
+    dest: "{{ bootstrap_basedir }}/dcos_generate_config.sh"
 
 - name: Check if dcos serve directory is already present
-  stat: path="{{ bootstrap_basedir }}/genconf/serve"
+  stat:
+    path: "{{ bootstrap_basedir }}/genconf/serve"
   register: serve_directory
 
 - name: Generate customized DC/OS build file

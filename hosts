@@ -1,0 +1,10 @@
+[cluster:children
+master
+agent
+
+[master]
+
+[agent]
+
+[bootstrap]
+139.59.212.180 hostname=bootstrap.dcos.w9f.de
