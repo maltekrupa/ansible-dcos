@@ -55,6 +55,14 @@
     mode: 0644
     owner: root
     group: root
+  register: systemd
+  tags:
+    - docker
+
+- name: Reload systemd
+  command: systemctl daemon-reload
+  notify: restart docker
+  when: systemd|changed
   tags:
     - docker
 
